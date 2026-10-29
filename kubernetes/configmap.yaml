@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: teenflow-config
-data:
-  DB_URL: jdbc:postgresql://postgres:5432/teenflow
-  DB_USER: teenflow
-  TASK_SERVICE_URL: http://task-service:8080
