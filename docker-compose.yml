@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: teenflow
+      POSTGRES_USER: teenflow
+      POSTGRES_PASSWORD: local
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teenflow -d teenflow"]
+      interval: 5s
+      retries: 10
+  task-service:
+    build: ./task-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/teenflow
+      DB_USER: teenflow
+      DB_PASSWORD: local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+  planner-service:
+    build: ./planner-service
+    environment:
+      TASK_SERVICE_URL: http://task-service:8080
+    depends_on:
+      - task-service
+    ports:
+      - "8000:8000"
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - task-service
+      - planner-service
+volumes:
+  postgres-data:
